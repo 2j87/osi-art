@@ -8,7 +8,7 @@
 //! karttaki `SINUS.CFG` -> `shape = ...` satiriyla secilir.
 
 use core::f32::consts::{PI, TAU};
-use libm::{cosf, expf, fabsf, sinf};
+use libm::{cosf, expf, fabsf, floorf, sinf};
 
 /// Hazir sekiller. `#[repr(u8)]` sart degil ama enum'u kucuk tutar.
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -29,12 +29,14 @@ pub enum Shape {
     Butterfly,
     /// Ice ve disa donen simetrik spiral.
     Spiral,
+    /// Disli / cark halkasi -- sanayi amblemi gorunumu (EMTAS tarzi).
+    Gear,
 }
 
 impl Shape {
     /// Butonla donulen sira. Yeni sekil eklemek istersen sadece buraya ekle;
     /// `next`, `index` ve buton dongusu otomatik uyum saglar.
-    pub const ALL: [Shape; 8] = [
+    pub const ALL: [Shape; 9] = [
         Shape::Ellipse,
         Shape::Circle,
         Shape::Figure8,
@@ -43,6 +45,7 @@ impl Shape {
         Shape::Rose,
         Shape::Butterfly,
         Shape::Spiral,
+        Shape::Gear,
     ];
 
     /// Siradaki sekil (sona gelince basa sarar). Buton her basista bunu cagirir.
@@ -69,6 +72,7 @@ impl Shape {
             "rose" | "gul" | "cicek" | "flower" => Some(Shape::Rose),
             "butterfly" | "kelebek" => Some(Shape::Butterfly),
             "spiral" => Some(Shape::Spiral),
+            "gear" | "disli" | "cark" | "logo" | "amblem" => Some(Shape::Gear),
             _ => None,
         }
     }
@@ -122,6 +126,24 @@ impl Shape {
                 let r = 1.0 - fabsf(2.0 * t - 1.0); // 0..1..0
                 let ang = TAU * 5.0 * t; // 5 tur
                 (r * cosf(ang), r * sinf(ang))
+            }
+
+            // Disli / cark halkasi -- EMTAS tarzi sanayi amblemi.
+            //
+            // Yaricap, aci ilerledikce dis (R_OUT) ve ic (R_IN) arasinda kare
+            // dalga gibi gidip geliyor: her disin ustu R_OUT'ta duz, cukuru
+            // R_IN'de duz. Iki seviye arasindaki ani gecis, ardisik ornekleri
+            // neredeyse RADYAL bir cizgiyle birlestirir -- disin yan kenarini
+            // cizen sey bu. Tek parca, kapali dongu (retrace cizgisi yok).
+            Shape::Gear => {
+                const TEETH: f32 = 30.0; // dis sayisi
+                const R_OUT: f32 = 1.0; // dis ustu (ekrani doldurur)
+                const R_IN: f32 = 0.72; // dis cukuru
+                let seg = TEETH * t; // 0..TEETH
+                let frac = seg - floorf(seg); // tek dis icindeki oran 0..1
+                let r = if frac < 0.5 { R_OUT } else { R_IN };
+                let a = TAU * t;
+                (r * cosf(a), r * sinf(a))
             }
         }
     }
