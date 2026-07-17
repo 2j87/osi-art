@@ -1,0 +1,49 @@
+[package]
+name = "sinus"
+version = "0.1.0"
+edition = "2021"
+authors = ["Hüseyin"]
+description = "STM32H750VBT6 (WeAct mini) dual-DAC quadrature-ish sine generator: 60 deg phase shift, DMA circular, TIM6 triggered"
+
+[dependencies]
+cortex-m = { version = "0.7.7", features = ["critical-section-single-core"] }
+cortex-m-rt = "0.7.5"
+panic-halt = "1.0.0"
+libm = "0.2.16"
+
+# FAT32 dosya sistemi. Surumu stm32h7xx-hal'in bagimli oldugu surumle AYNI
+# olmali (0.5) -- farkli olsaydi cargo iki ayri kopya derler ve HAL'in
+# uretttigi `BlockDevice` bizim `Controller`'imizin bekledigi tiple
+# uyusmazdi. Klasik "iki farkli surum, ayni isim" hatasi.
+embedded-sdmmc = "0.5"
+
+[dependencies.stm32h7xx-hal]
+version = "0.16.0"
+# sdmmc-fatfs = sdmmc suruculeri + embedded-sdmmc koprusu
+features = ["stm32h750v", "rt", "sdmmc-fatfs"]
+
+# ---------------------------------------------------------------------------
+# Release profile.
+#
+# `opt-level = "s"`  : H750 has only 128 KB of internal flash, so we optimise
+#                      for size rather than raw speed. The heavy lifting here is
+#                      done by DMA + DAC hardware, not by the CPU.
+# `lto = "fat"`      : whole-program link-time optimisation. Lets the linker
+#                      drop everything the HAL brings in but we never call.
+# `codegen-units = 1`: one compilation unit -> better LTO, slower builds.
+# `debug = true`     : DWARF info lives in the ELF only. `objcopy -O binary`
+#                      strips it, so the flashed .bin is not affected at all.
+#                      Keep it: it makes disassembly / size analysis possible.
+# `panic = "abort"`  : no unwinding on a Cortex-M anyway; saves flash.
+# ---------------------------------------------------------------------------
+[profile.release]
+opt-level = "s"
+lto = "fat"
+codegen-units = 1
+debug = true
+panic = "abort"
+overflow-checks = false
+
+[profile.dev]
+opt-level = 1
+panic = "abort"
