@@ -14,7 +14,7 @@ buton/LED dışında sinyale hiç karışmaz. Kesmeler, gecikmeler veya başka i
 | **PA5** (DAC1_OUT2) | dikey eksen — **Y** |
 | Osiloskop modu | **XY** (CH1→X, CH2→Y, GND ortak) |
 | Varsayılan şekil | **Kalp** ❤️ |
-| Şekiller | ellipse · circle · figure8 · **heart** · star · rose · butterfly · spiral · gear |
+| Şekiller | ellipse · circle · figure8 · **heart** · star · rose · butterfly · spiral · gear · elsan |
 | Şekil değiştir | **K1 butonu** (PC13) |
 | LUT | 1024 nokta, kanal başına 12-bit (0–4095) |
 | Çizim hızı | `frame_hz` (varsayılan 60 fps) |
@@ -206,7 +206,9 @@ kalır, DMA RAM'den bayat veri okurdu.
 |---|---|
 | `src/main.rs` | Clock/GPIO/DAC/TIM6/DMA kurulumu, buton/LED döngüsü |
 | `src/waveform.rs` | LUT üretimi (şekil → X/Y noktaları), `DHR12RD` paketleme |
-| `src/shapes.rs` | Şekil kataloğu (kalp, elips, çember, sekiz, yıldız, gül, kelebek, spiral, dişli) |
+| `src/shapes.rs` | Şekil kataloğu (kalp, elips, çember, sekiz, yıldız, gül, kelebek, spiral, dişli, ELSAN) |
+| `src/text_elsan.rs` | "ELSAN" yazısının önceden hesaplanmış nokta tablosu |
+| `tools/gen_text.py` | İstediğin kelimeyi vektör yazıya çevirip tablo üretir |
 | `src/config.rs` | `Config` + `key=value` parser (varsayılan: kalp) |
 | `src/sdcard.rs` | SDMMC1 + FAT32, `SINUS.CFG` okuma |
 | `src/dac_dma.rs` | Dual mode, TSEL/TEN/DMAEN, TIM6 TRGO, DMA hedefi, start/stop |

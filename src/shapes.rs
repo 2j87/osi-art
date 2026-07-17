@@ -31,12 +31,14 @@ pub enum Shape {
     Spiral,
     /// Disli / cark halkasi -- sanayi amblemi gorunumu (EMTAS tarzi).
     Gear,
+    /// "ELSAN" yazisi (buyuk harf). Onceden hesaplanmis nokta tablosu.
+    Elsan,
 }
 
 impl Shape {
     /// Butonla donulen sira. Yeni sekil eklemek istersen sadece buraya ekle;
     /// `next`, `index` ve buton dongusu otomatik uyum saglar.
-    pub const ALL: [Shape; 9] = [
+    pub const ALL: [Shape; 10] = [
         Shape::Ellipse,
         Shape::Circle,
         Shape::Figure8,
@@ -46,6 +48,7 @@ impl Shape {
         Shape::Butterfly,
         Shape::Spiral,
         Shape::Gear,
+        Shape::Elsan,
     ];
 
     /// Siradaki sekil (sona gelince basa sarar). Buton her basista bunu cagirir.
@@ -73,6 +76,7 @@ impl Shape {
             "butterfly" | "kelebek" => Some(Shape::Butterfly),
             "spiral" => Some(Shape::Spiral),
             "gear" | "disli" | "cark" | "logo" | "amblem" => Some(Shape::Gear),
+            "elsan" | "yazi" | "text" => Some(Shape::Elsan),
             _ => None,
         }
     }
@@ -144,6 +148,15 @@ impl Shape {
                 let r = if frac < 0.5 { R_OUT } else { R_IN };
                 let a = TAU * t;
                 (r * cosf(a), r * sinf(a))
+            }
+
+            // "ELSAN" -- host'ta hesaplanmis nokta tablosu (bkz. text_elsan.rs).
+            // Tablo boyu POINTS'ten bagimsiz olsun diye i'yi orantili indeksle;
+            // n == tablo boyu (2048) oldugunda idx = i olur.
+            Shape::Elsan => {
+                let tbl = &crate::text_elsan::ELSAN;
+                let idx = (i * tbl.len()) / n.max(1);
+                tbl[idx.min(tbl.len() - 1)]
             }
         }
     }

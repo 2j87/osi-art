@@ -1,8 +1,8 @@
 //! WeAct STM32H750VBT6 -- osiloskop XY vektor cizici.
 //!
 //! Birkac hazir sekli (elips, cember, sekiz, kalp, yildiz, gul, kelebek,
-//! spiral, disli) DAC dual mode + TIM6 tetigi + DMA ile ureti. Osiloskobu XY
-//! moduna al: PA4 = yatay,
+//! spiral, disli, "ELSAN" yazisi) DAC dual mode + TIM6 tetigi + DMA ile ureti.
+//! Osiloskobu XY moduna al: PA4 = yatay,
 //! PA5 = dikey.
 //!
 //! * SD karttaki `SINUS.CFG` -> `shape = ...` baslangic seklini secer.
@@ -31,6 +31,7 @@ mod config;
 mod dac_dma;
 mod sdcard;
 mod shapes;
+mod text_elsan;
 mod waveform;
 
 use config::Config;
@@ -46,7 +47,7 @@ const HSE_FREQ_MHZ: u32 = 25;
 /// gecilir.
 const FALLBACK_CONFIG: &str = "\
 # WeAct H750 -- osiloskop XY sekil cizici
-# shape: ellipse|circle|figure8|heart|star|rose|butterfly|spiral|gear
+# shape: ellipse|circle|figure8|heart|star|rose|butterfly|spiral|gear|elsan
 shape     = heart
 amplitude = 0.85
 offset    = 0.5
