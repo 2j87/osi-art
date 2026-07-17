@@ -33,12 +33,14 @@ pub enum Shape {
     Gear,
     /// "ELSAN" yazisi (buyuk harf). Onceden hesaplanmis nokta tablosu.
     Elsan,
+    /// Spirograf / mandala (hypotrochoid). Yogun, simetrik "karakalem" desen.
+    Mandala,
 }
 
 impl Shape {
     /// Butonla donulen sira. Yeni sekil eklemek istersen sadece buraya ekle;
     /// `next`, `index` ve buton dongusu otomatik uyum saglar.
-    pub const ALL: [Shape; 10] = [
+    pub const ALL: [Shape; 11] = [
         Shape::Ellipse,
         Shape::Circle,
         Shape::Figure8,
@@ -49,6 +51,7 @@ impl Shape {
         Shape::Spiral,
         Shape::Gear,
         Shape::Elsan,
+        Shape::Mandala,
     ];
 
     /// Siradaki sekil (sona gelince basa sarar). Buton her basista bunu cagirir.
@@ -77,6 +80,7 @@ impl Shape {
             "spiral" => Some(Shape::Spiral),
             "gear" | "disli" | "cark" | "logo" | "amblem" => Some(Shape::Gear),
             "elsan" | "yazi" | "text" => Some(Shape::Elsan),
+            "mandala" | "spirograph" | "spirograf" => Some(Shape::Mandala),
             _ => None,
         }
     }
@@ -157,6 +161,26 @@ impl Shape {
                 let tbl = &crate::text_elsan::ELSAN;
                 let idx = (i * tbl.len()) / n.max(1);
                 tbl[idx.min(tbl.len() - 1)]
+            }
+
+            // Spirograf / mandala -- hypotrochoid egrisi:
+            //   x = (R-r)·cosθ + d·cos(((R-r)/r)·θ)
+            //   y = (R-r)·sinθ - d·sin(((R-r)/r)·θ)
+            // R=13, r=8, d=9 -> 13 kollu yogun mandala. gcd(13,8)=1 oldugu icin
+            // θ = 0..2π·8 (8 turda) egri KAPANIR; en genis yaricap (R-r)+d=14,
+            // 0.97/14 ile olceklenip ekrana kirpilmadan sigdirilir.
+            // (Baska desen istersen R/r/d degerlerini degistir: 5/3/5 sade
+            //  5-loop, 7/4/7 yildiz-cicek.)
+            Shape::Mandala => {
+                const RMR: f32 = 5.0; // R - r
+                const RATIO: f32 = 5.0 / 8.0; // (R - r) / r
+                const D: f32 = 9.0;
+                const TURNS: f32 = 8.0; // r / gcd(R, r)
+                const NORM: f32 = 0.97 / 14.0; // 1 / ((R-r)+d), pay birakarak
+                let th = TAU * TURNS * t;
+                let x = RMR * cosf(th) + D * cosf(RATIO * th);
+                let y = RMR * sinf(th) - D * sinf(RATIO * th);
+                (x * NORM, y * NORM)
             }
         }
     }

@@ -14,7 +14,7 @@ buton/LED dışında sinyale hiç karışmaz. Kesmeler, gecikmeler veya başka i
 | **PA5** (DAC1_OUT2) | dikey eksen — **Y** |
 | Osiloskop modu | **XY** (CH1→X, CH2→Y, GND ortak) |
 | Varsayılan şekil | **Kalp** ❤️ |
-| Şekiller | ellipse · circle · figure8 · **heart** · star · rose · butterfly · spiral · gear · elsan |
+| Şekiller | ellipse · circle · figure8 · **heart** · star · rose · butterfly · spiral · gear · elsan · mandala |
 | Şekil değiştir | **K1 butonu** (PC13) |
 | LUT | 1024 nokta, kanal başına 12-bit (0–4095) |
 | Çizim hızı | `frame_hz` (varsayılan 60 fps) |
@@ -108,7 +108,7 @@ gömülü varsayılan kullanılır. **Her iki durumda da varsayılan KALP'tir.**
 
 | Anahtar | Aralık | Anlamı |
 |---|---|---|
-| `shape` | ellipse·circle·figure8·**heart**·star·rose·butterfly·spiral | Başlangıç şekli (Türkçe adlar da geçer: gul, kelebek, spiral…) |
+| `shape` | ellipse·circle·figure8·**heart**·star·rose·butterfly·spiral·gear·elsan·mandala | Başlangıç şekli (Türkçe adlar da geçer: gul, kelebek, disli, mandala…) |
 | `amplitude` | 0.0 – 1.0 | Çizim boyutu (tam ölçeğin oranı) |
 | `offset` | 0.0 – 1.0 | Çizim merkezi (0.5 ≈ ekran ortası, ~1.65 V) |
 | `frame_hz` | 20 – 200 | Saniyedeki çizim tekrarı (titremesin diye ≥ 50) |
@@ -206,7 +206,7 @@ kalır, DMA RAM'den bayat veri okurdu.
 |---|---|
 | `src/main.rs` | Clock/GPIO/DAC/TIM6/DMA kurulumu, buton/LED döngüsü |
 | `src/waveform.rs` | LUT üretimi (şekil → X/Y noktaları), `DHR12RD` paketleme |
-| `src/shapes.rs` | Şekil kataloğu (kalp, elips, çember, sekiz, yıldız, gül, kelebek, spiral, dişli, ELSAN) |
+| `src/shapes.rs` | Şekil kataloğu (kalp, elips, çember, sekiz, yıldız, gül, kelebek, spiral, dişli, ELSAN, mandala) |
 | `src/text_elsan.rs` | "ELSAN" yazısının önceden hesaplanmış nokta tablosu |
 | `tools/gen_text.py` | İstediğin kelimeyi vektör yazıya çevirip tablo üretir |
 | `src/config.rs` | `Config` + `key=value` parser (varsayılan: kalp) |

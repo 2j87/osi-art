@@ -1,7 +1,7 @@
 //! WeAct STM32H750VBT6 -- osiloskop XY vektor cizici.
 //!
 //! Birkac hazir sekli (elips, cember, sekiz, kalp, yildiz, gul, kelebek,
-//! spiral, disli, "ELSAN" yazisi) DAC dual mode + TIM6 tetigi + DMA ile ureti.
+//! spiral, disli, "ELSAN" yazisi, mandala) DAC dual mode + TIM6 tetigi + DMA
 //! Osiloskobu XY moduna al: PA4 = yatay,
 //! PA5 = dikey.
 //!
@@ -47,7 +47,7 @@ const HSE_FREQ_MHZ: u32 = 25;
 /// gecilir.
 const FALLBACK_CONFIG: &str = "\
 # WeAct H750 -- osiloskop XY sekil cizici
-# shape: ellipse|circle|figure8|heart|star|rose|butterfly|spiral|gear|elsan
+# shape: ellipse|circle|figure8|heart|star|rose|butterfly|spiral|gear|elsan|mandala
 shape     = heart
 amplitude = 0.85
 offset    = 0.5
