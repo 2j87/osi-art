@@ -1,0 +1,81 @@
+# Firmware'i bulutta derler ve indirilebilir .bin / .hex uretir.
+#
+# AMAC: Bilgisayarin yaninda olmasa bile, her push'ta GitHub firmware'i
+# derleyip hazir dosyalari "Artifacts" olarak yukler. Telefondan/baska bir
+# makineden bu dosyalari indirip STM32CubeProgrammer (DFU USB) ile karta
+# yazabilirsin -- yerelde Rust kurmana gerek yok.
+#
+# Ayrica `v1.0` gibi bir etiket (tag) push edersen dosyalar bir Release'e de
+# eklenir; boylece kalici, dogrudan bir indirme linkin olur.
+
+name: firmware
+
+on:
+  push:
+    branches: ["**"]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch: # Actions sekmesinden elle de tetiklenebilir.
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Rust toolchain (Cortex-M7F hedefi + llvm-tools)
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup target add thumbv7em-none-eabihf
+          rustup component add llvm-tools-preview
+
+      - name: Cargo cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: cargo-${{ hashFiles('Cargo.lock') }}
+
+      - name: Derle (release)
+        run: cargo build --release
+
+      - name: ELF -> .bin + .hex
+        run: |
+          ELF=target/thumbv7em-none-eabihf/release/sinus
+          OBJCOPY=$(find "$(rustc --print sysroot)" -name llvm-objcopy | head -1)
+          mkdir -p firmware
+          "$OBJCOPY" -O binary "$ELF" firmware/heart.bin
+          "$OBJCOPY" -O ihex   "$ELF" firmware/heart.hex
+          ls -la firmware/
+
+      - name: Dogrula (LUT AXI SRAM'de mi, .bin gecerli mi)
+        run: |
+          NM=$(find "$(rustc --print sysroot)" -name llvm-nm | head -1)
+          echo "LUT adresi (0x24... = AXI SRAM, DMA erisebilir olmali):"
+          "$NM" --print-size target/thumbv7em-none-eabihf/release/sinus | grep -i LUT
+          python3 - <<'PY'
+          import struct
+          d = open("firmware/heart.bin", "rb").read()
+          sp  = struct.unpack("<I", d[0:4])[0]
+          rst = struct.unpack("<I", d[4:8])[0]
+          assert 0x20000000 <= sp <= 0x20020000, f"stack pointer sacma: {sp:#x}"
+          assert 0x08000000 <= rst <  0x08040000, f"reset vector flash'ta degil: {rst:#x}"
+          print(f"OK  SP={sp:#010x}  reset={rst:#010x}  boyut={len(d)} bayt")
+          PY
+
+      - name: Artifact yukle (heart.bin + heart.hex)
+        uses: actions/upload-artifact@v4
+        with:
+          name: heart-firmware
+          path: firmware/*
+
+      # Sadece `v*` etiketi push edilince: kalici bir Release olustur.
+      - name: Release'e ekle (yalnizca tag push'ta)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            firmware/heart.bin
+            firmware/heart.hex

@@ -1,0 +1,20 @@
+# Cortex-M7 (STM32H750) hedefi + linker + DFU runner.
+#
+# Bu dosya commit edilmeliydi ama repoda eksikti; onsuz `cargo build`
+# host (x86) hedefine derlemeye calisir ve `no_std` binary linklenmez.
+
+[build]
+# Her `cargo build` otomatik olarak Cortex-M7F hedefine derlensin;
+# `--target` yazmaya gerek kalmasin.
+target = "thumbv7em-none-eabihf"
+
+[target.thumbv7em-none-eabihf]
+# cortex-m-rt'nin link script'i. `-Tlink.x` icindeki INCLUDE memory.x'i
+# `build.rs`'in link-search yoluna kopyaladigi kopyadan bulur.
+rustflags = ["-C", "link-arg=-Tlink.x"]
+
+# `cargo run --release` -> ELF'i .bin'e cevirip USB DFU ile yukleyen betik.
+# (Windows/PowerShell. Bilgisayarin yaninda degilse GitHub Actions'in urettigi
+#  hazir .bin'i indirip STM32CubeProgrammer ile DFU'dan yukleyebilirsin --
+#  bkz. README bolum "Bilgisayarsiz flashleme".)
+runner = "powershell -ExecutionPolicy Bypass -File flash.ps1"

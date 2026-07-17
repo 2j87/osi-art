@@ -200,4 +200,19 @@ pub fn configure_tim6(tim6: &pac::TIM6, kernel_clk_hz: u32, sample_rate_hz: u32)
 
 /// TIM6'yi baslat -- bu andan itibaren DAC ornek uretmeye baslar.
 /// Sekil degisiminde LUT tazelendikten sonra "devam et" olarak da kullanilir.
-pub fn star
+///
+/// `CEN` (Counter ENable) biti sayaci calistirir; tasma basina TRGO uretilir,
+/// bu da DAC'i tetikler ve DMA LUT'ta bir adim ilerler. Guvenli: `cen` alani
+/// PAC'ta tek-bitlik bir enum olarak uretilmis.
+pub fn start_trigger(tim6: &pac::TIM6) {
+    tim6.cr1.modify(|_, w| w.cen().set_bit());
+}
+
+/// TIM6'yi durdur -- tetik gelmez, DAC son yazilan degerde kalir.
+///
+/// Sekil degisiminde LUT'u YERINDE guvenle tazeleyebilmek icin once bunu
+/// cagiriyoruz: sayac dururken DMA tampondan okumadigi icin yazma/okuma
+/// cakismasi olmaz (bkz. `waveform::fill` SAFETY notu).
+pub fn pause_trigger(tim6: &pac::TIM6) {
+    tim6.cr1.modify(|_, w| w.cen().clear_bit());
+}

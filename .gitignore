@@ -1,0 +1,5 @@
+# Rust derleme ciktilari
+/target
+
+# Yerelde uretilen ara .bin/.elf (CI'nin urettigi firmware/ ayri, o commit'li)
+*.elf
