@@ -8,7 +8,7 @@
 //! karttaki `SINUS.CFG` -> `shape = ...` satiriyla secilir.
 
 use core::f32::consts::{PI, TAU};
-use libm::{cosf, sinf};
+use libm::{cosf, expf, fabsf, sinf};
 
 /// Hazir sekiller. `#[repr(u8)]` sart degil ama enum'u kucuk tutar.
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -23,17 +23,26 @@ pub enum Shape {
     Heart,
     /// Bes koseli yildiz.
     Star,
+    /// Bes yapraklı gul/cicek (rhodonea egrisi, r = cos(5θ)).
+    Rose,
+    /// Fay kelebek egrisi (Temple H. Fay, 1989).
+    Butterfly,
+    /// Ice ve disa donen simetrik spiral.
+    Spiral,
 }
 
 impl Shape {
     /// Butonla donulen sira. Yeni sekil eklemek istersen sadece buraya ekle;
     /// `next`, `index` ve buton dongusu otomatik uyum saglar.
-    pub const ALL: [Shape; 5] = [
+    pub const ALL: [Shape; 8] = [
         Shape::Ellipse,
         Shape::Circle,
         Shape::Figure8,
         Shape::Heart,
         Shape::Star,
+        Shape::Rose,
+        Shape::Butterfly,
+        Shape::Spiral,
     ];
 
     /// Siradaki sekil (sona gelince basa sarar). Buton her basista bunu cagirir.
@@ -57,6 +66,9 @@ impl Shape {
             "figure8" | "sekiz" => Some(Shape::Figure8),
             "heart" | "kalp" => Some(Shape::Heart),
             "star" | "yildiz" => Some(Shape::Star),
+            "rose" | "gul" | "cicek" | "flower" => Some(Shape::Rose),
+            "butterfly" | "kelebek" => Some(Shape::Butterfly),
+            "spiral" => Some(Shape::Spiral),
             _ => None,
         }
     }
@@ -78,6 +90,39 @@ impl Shape {
                 (x / 17.0, y / 17.0)
             }
             Shape::Star => star(t),
+
+            // Gul/cicek: rhodonea r = cos(k·θ). k=5 (tek sayi) -> 5 yaprak.
+            // r [-1, 1] arasinda, (x, y) birim cember icinde kaliyor; ekstra
+            // olceklemeye gerek yok. Tek sayi k'de egri bir turda iki kez
+            // cizilir (yapraklar birebir ust uste), gorsel olarak sorun degil.
+            Shape::Rose => {
+                let r = cosf(5.0 * a);
+                (r * cosf(a), r * sinf(a))
+            }
+
+            // Fay kelebek egrisi. Parametre bir tam turda 0..24π gezer (t/12
+            // teriminin periyodu 24π); boylece nokta baslangica tam doner ve
+            // dongu KAPALI olur -- geri donus (retrace) cizgisi olmaz.
+            //
+            // Ham egrinin en genis noktasi ~3.93; 4.1'e bolerek ekrana tam
+            // sigdiriyoruz (kirpilmadan, kenarda kucuk pay birakarak).
+            Shape::Butterfly => {
+                let u = TAU * 12.0 * t; // 0..24π
+                let s12 = sinf(u / 12.0);
+                let s5 = s12 * s12 * s12 * s12 * s12; // sin^5(u/12), powf'suz
+                let rad = expf(cosf(u)) - 2.0 * cosf(4.0 * u) - s5;
+                (sinf(u) * rad / 4.1, cosf(u) * rad / 4.1)
+            }
+
+            // Spiral: yaricap 0->1->0 ucgen zarfi (t'nin ortasinda 1), aci ise
+            // surekli artar. Boylece merkezden acilip yine merkezde kapanan
+            // simetrik bir spiral olur; basi ve sonu ayni nokta (orijin) oldugu
+            // icin dongu kapali, stray cizgi yok.
+            Shape::Spiral => {
+                let r = 1.0 - fabsf(2.0 * t - 1.0); // 0..1..0
+                let ang = TAU * 5.0 * t; // 5 tur
+                (r * cosf(ang), r * sinf(ang))
+            }
         }
     }
 }

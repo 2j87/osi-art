@@ -57,7 +57,7 @@ impl Config {
     /// Beklenen dosya (SD kartin kokune `SINUS.CFG`):
     ///
     /// ```text
-    /// shape     = heart        # ellipse|circle|figure8|heart|star
+    /// shape     = heart        # ellipse|circle|figure8|heart|star|rose|butterfly|spiral
     /// amplitude = 0.85
     /// offset    = 0.5
     /// frame_hz  = 60

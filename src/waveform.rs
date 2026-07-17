@@ -14,10 +14,11 @@ use crate::shapes::Shape;
 
 /// LUT'taki nokta sayisi. Tum sekiller bu kadar noktaya orneklenir.
 ///
-/// 1024, kalp/yildiz gibi koseli sekilleri bile puruzsuz gosterecek kadar
-/// bol. Timer tetik hizi = frame_hz * POINTS (orn. 60 * 1024 ~ 61 kHz),
-/// DAC icin cok rahat. 1024 * 4 = 4 KB, AXI SRAM'de devede kulak.
-pub const POINTS: usize = 1024;
+/// 2048: kelebek egrisi gibi bir turda ~12 kanat gecisi olan yogun sekilleri
+/// bile puruzsuz gosterecek kadar bol. Timer tetik hizi = frame_hz * POINTS
+/// (orn. 60 * 2048 ~ 123 kHz), DAC icin hala cok rahat (~1.7 µs oturma ->
+/// ~590 kSPS pratik ust sinir). 2048 * 4 = 8 KB, AXI SRAM'de devede kulak.
+pub const POINTS: usize = 2048;
 
 const DAC_MAX: f32 = 4095.0;
 
